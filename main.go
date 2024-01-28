@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+  "strconv"
 	"net/http"
 
 	"gorm.io/driver/postgres"
@@ -47,18 +48,36 @@ func main() {
   // Migrate the schema
   db.AutoMigrate(&Product{})
 
-  // Create
-  db.Create(&Product{
-    Title: "Airpods Pro 2nd Generation",
-    Slug: "airpods-pro-2nd-generation",
-    Price: 100,
-  })
-
   r := gin.Default()
-  r.GET("/ping", func(c *gin.Context) {
-    c.JSON(http.StatusOK, gin.H{
-      "message": "pong",
-    })
+
+  r.Use(func(c *gin.Context) {
+		c.Header("Content-Type", "application/json")
+		c.Next()
+	})
+
+  r.GET("/products", func(c *gin.Context) {
+		page, _ := strconv.Atoi(c.Query("page"))
+		limit, _ := strconv.Atoi(c.Query("limit"))
+
+		if page <= 0 {
+			page = 1
+		}
+
+		if limit <= 0 {
+			limit = 10
+		}
+
+		offset := (page - 1) * limit
+
+		var products []Product
+		db.Offset(offset).Limit(limit).Find(&products)
+
+		c.JSON(http.StatusOK, gin.H{
+			"page":       page,
+			"limit":      limit,
+			"products":   products,
+		})
   })
+  
   r.Run()
 }
