@@ -25,6 +25,27 @@ type Product struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
+type Address struct {
+	ID         uint           `gorm:"primaryKey" json:"id"`
+	Line1      string         `gorm:"not null" json:"line1"`
+	Line2      string         `json:"line2"`
+	PostalCode string         `json:"postalCode"`
+	Landmark   string         `json:"landmark"`
+	CreatedAt  time.Time      `json:"createdAt"`
+	UpdatedAt  time.Time      `json:"updatedAt"`
+	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+type User struct {
+	ID        uint           `gorm:"primaryKey" json:"id"`
+	Name      string         `gorm:"not null" json:"name"`
+	AddressId int            `gorm:"default:null" json:"-"`
+	Address   *Address       `json:"address,omitempty"`
+	CreatedAt time.Time      `json:"createdAt"`
+	UpdatedAt time.Time      `json:"updatedAt"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -49,6 +70,8 @@ func main() {
 	}
 
 	// Migrate the schema
+	db.AutoMigrate(&Address{})
+	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Product{})
 
 	r := gin.Default()
@@ -56,6 +79,19 @@ func main() {
 	r.Use(func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 		c.Next()
+	})
+
+	r.POST("/auth/signup", func(c *gin.Context) {
+		var user User
+
+		if err := c.BindJSON(&user); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		db.Create(&user)
+
+		c.JSON(http.StatusCreated, user)
 	})
 
 	r.GET("/products", func(c *gin.Context) {
