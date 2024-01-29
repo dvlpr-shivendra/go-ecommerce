@@ -14,6 +14,8 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Product struct {
@@ -39,6 +41,9 @@ type Address struct {
 type User struct {
 	ID        uint           `gorm:"primaryKey" json:"id"`
 	Name      string         `gorm:"not null" json:"name"`
+	Phone     string         `gorm:"size:15" json:"phone"`
+	Email     string         `gorm:"size:255" json:"email"`
+	Password  string         `gorm:"size:1000" json:"-"`
 	AddressId int            `gorm:"default:null" json:"-"`
 	Address   *Address       `json:"address,omitempty"`
 	CreatedAt time.Time      `json:"createdAt"`
@@ -88,6 +93,15 @@ func main() {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+
+		password, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		user.Password = string(password)
 
 		db.Create(&user)
 
