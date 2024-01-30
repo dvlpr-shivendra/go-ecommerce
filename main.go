@@ -16,6 +16,8 @@ import (
 	"github.com/joho/godotenv"
 
 	"golang.org/x/crypto/bcrypt"
+
+	jwt "github.com/golang-jwt/jwt/v5"
 )
 
 type Product struct {
@@ -41,8 +43,8 @@ type Address struct {
 type User struct {
 	ID        uint           `gorm:"primaryKey" json:"id"`
 	Name      string         `gorm:"not null" json:"name"`
-	Phone     string         `gorm:"size:15" json:"phone"`
-	Email     string         `gorm:"size:255" json:"email"`
+	Phone     string         `gorm:"uniqueIndex;size:15" json:"phone"`
+	Email     string         `gorm:"uniqueIndex;size:255" json:"email"`
 	Password  string         `gorm:"size:1000" json:"-"`
 	AddressId int            `gorm:"default:null" json:"-"`
 	Address   *Address       `json:"address,omitempty"`
@@ -103,9 +105,29 @@ func main() {
 
 		user.Password = string(password)
 
-		db.Create(&user)
+		result := db.Create(&user)
 
-		c.JSON(http.StatusCreated, user)
+		if result.Error != nil {
+			c.JSON(http.StatusOK, gin.H{"error": result.Error})
+			return
+		}
+
+		claims := &jwt.MapClaims{
+			"expiresAt": 15000,
+			"userId":    user.ID,
+		}
+
+		secret := os.Getenv("JWT_SECRET")
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+		tokenStr, err := token.SignedString([]byte(secret))
+
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusCreated, gin.H{"token": tokenStr})
 	})
 
 	r.GET("/products", func(c *gin.Context) {
