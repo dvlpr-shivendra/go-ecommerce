@@ -13,21 +13,37 @@ import (
 	"ecommerce/app"
 )
 
-func HandleSignup(c *gin.Context) {
-	var user models.User
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
 
-	if err := c.BindJSON(&user); err != nil {
+type SignupRequest struct {
+	Name     string `json:"name"`
+	Phone    string `json:"phone"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func HandleSignup(c *gin.Context) {
+	var signupRequest SignupRequest
+
+	if err := c.BindJSON(&signupRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	password, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	password, err := bcrypt.GenerateFromPassword([]byte(signupRequest.Password), bcrypt.DefaultCost)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	var user models.User
+	user.Name = signupRequest.Name
+	user.Email = signupRequest.Email
+	user.Phone = signupRequest.Phone
 	user.Password = string(password)
 
 	result := app.Db.Create(&user)
@@ -37,15 +53,7 @@ func HandleSignup(c *gin.Context) {
 		return
 	}
 
-	claims := &jwt.MapClaims{
-		"expiresAt": 15000,
-		"userId":    user.ID,
-	}
-
-	secret := os.Getenv("JWT_SECRET")
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	tokenStr, err := token.SignedString([]byte(secret))
+	tokenStr, err := generateJWT(user.ID)
 
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
@@ -53,4 +61,55 @@ func HandleSignup(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"token": tokenStr})
+}
+
+func HandleLogin(c *gin.Context) {
+	var user models.User
+	var loginRequest LoginRequest
+
+	if err := c.BindJSON(&loginRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	result := app.Db.Where("email = ?", loginRequest.Email).First(&user)
+
+	if result.Error != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		return
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginRequest.Password))
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		return
+	}
+
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
+		return
+	}
+
+	tokenStr, err := generateJWT(user.ID)
+
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"token": tokenStr})
+}
+
+func generateJWT(userId uint) (string, error) {
+	claims := &jwt.MapClaims{
+		"expiresAt": 15000,
+		"userId":    userId,
+	}
+
+	secret := os.Getenv("JWT_SECRET")
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	tokenStr, err := token.SignedString([]byte(secret))
+	return tokenStr, err
 }

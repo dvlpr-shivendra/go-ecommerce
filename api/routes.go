@@ -16,6 +16,7 @@ func SetupRoutes() {
 	r.GET("/products", handlers.HandleGetProducts)
     r.POST("/products", handlers.HandleSaveProduct)
 	r.POST("/auth/signup", handlers.HandleSignup)
+	r.POST("/auth/login", handlers.HandleLogin)
 	
 	r.Run()
 }
