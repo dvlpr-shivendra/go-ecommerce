@@ -28,8 +28,8 @@ func InitDB() {
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
-	Db = db;
-	db.AutoMigrate(&models.Address{})
+	Db = db
+	
 	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.Product{})
 
