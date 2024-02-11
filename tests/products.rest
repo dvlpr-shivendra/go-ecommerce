@@ -7,5 +7,6 @@ content-type: application/json
 
 {
     "title": "Logi POP",
+    "description": "Logitech's POP Silent Mouse in Heartbreaker combines neon corals and crushed raspberry colors for a bold and caring design. This compact wireless mouse, featuring SilentTouch Technology, offers comfort and a 24-month battery life. The emoji button allows quick access to a menu of emojis, while the SmartWheel enables seamless transitions between high-precision tracking and speed scroll mode. Additionally, the mouse is environmentally conscious, incorporating certified post-consumer recycled plastic and achieving carbon neutrality.",
     "price": 5000
 }
