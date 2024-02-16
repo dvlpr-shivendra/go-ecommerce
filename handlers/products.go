@@ -1,13 +1,29 @@
 package handlers
 
 import (
-	"ecommerce/models"
 	"ecommerce/app"
+	"ecommerce/models"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
+
+func HandleGetProductById(c *gin.Context) {
+	productID := c.Param("id")
+
+	fmt.Println(productID);
+
+	var product models.Product
+
+	if err := app.Db.First(&product, productID).Error; err != nil {
+		c.JSON(404, gin.H{"error": "Product not found"})
+		return
+	}
+
+	c.JSON(200, product)
+}
 
 func HandleGetProducts(c *gin.Context) {
 	page, _ := strconv.Atoi(c.Query("page"))

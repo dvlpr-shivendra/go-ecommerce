@@ -13,8 +13,10 @@ func SetupRoutes() {
 		c.Next()
 	})
 
-	r.GET("/products", handlers.HandleGetProducts)
     r.POST("/products", handlers.HandleSaveProduct)
+	r.GET("/products", handlers.HandleGetProducts)
+	r.GET("/products/:id", handlers.HandleGetProductById)
+
 	r.POST("/auth/signup", handlers.HandleSignup)
 	r.POST("/auth/login", handlers.HandleLogin)
 	
