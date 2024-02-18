@@ -22,16 +22,18 @@ func InitDB() {
 	dbPort := os.Getenv("DB_PORT")
 
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable client_encoding=UTF8",
 		dbHost, dbUser, dbPassword, dbName, dbPort,
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	Db = db
-	
+
+	db.AutoMigrate(&models.Address{})
 	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.Product{})
+	db.AutoMigrate(&models.Order{})
 
 	if err != nil {
 		panic(err)
