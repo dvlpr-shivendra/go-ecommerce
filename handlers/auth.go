@@ -60,7 +60,10 @@ func HandleSignup(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"token": tokenStr})
+	c.JSON(http.StatusCreated, gin.H{
+		"token": tokenStr,
+		"user": user,
+	})
 }
 
 func HandleLogin(c *gin.Context) {
@@ -98,7 +101,10 @@ func HandleLogin(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"token": tokenStr})
+	c.JSON(http.StatusContinue, gin.H{
+		"token": tokenStr,
+		"user": user,
+	})
 }
 
 func generateJWT(userId uint) (string, error) {
