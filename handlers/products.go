@@ -3,7 +3,6 @@ package handlers
 import (
 	"ecommerce/app"
 	"ecommerce/models"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -12,8 +11,6 @@ import (
 
 func HandleGetProductById(c *gin.Context) {
 	productID := c.Param("id")
-
-	fmt.Println(productID);
 
 	var product models.Product
 
