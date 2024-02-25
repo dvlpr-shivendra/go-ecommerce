@@ -2,9 +2,11 @@ package api
 
 import (
 	"ecommerce/handlers"
+	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
-	
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func SetupRoutes() {
@@ -17,14 +19,16 @@ func SetupRoutes() {
 
 	r.Use(corsMiddleware())
 
+	guardedRoutes := r.Group("/", authMiddleware)
+
 	r.POST("/products", handlers.HandleSaveProduct)
 	r.GET("/products", handlers.HandleGetProducts)
 	r.GET("/products/:id", handlers.HandleGetProductById)
 
 	r.POST("/auth/signup", handlers.HandleSignup)
 	r.POST("/auth/login", handlers.HandleLogin)
-	r.POST("/order/init", handlers.HandleOrderInit)
-	r.POST("/order/success", handlers.HandleOrderSuccess)
+	guardedRoutes.POST("/order/init", handlers.HandleOrderInit)
+	guardedRoutes.POST("/order/success", handlers.HandleOrderSuccess)
 
 	r.Run()
 }
@@ -42,5 +46,51 @@ func corsMiddleware() gin.HandlerFunc {
 		}
 
 		c.Next()
+	}
+}
+
+func authMiddleware(c *gin.Context) {
+	// Get the Authorization header value
+	tokenString := c.GetHeader("Authorization")
+
+	// Check if the token is missing
+	if tokenString == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.Abort()
+		return
+	}
+
+	secretKey := os.Getenv("JWT_SECRET")
+
+	// Parse the token
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+
+	// Check for parsing errors
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.Abort()
+		return
+	}
+
+	// Check if the token is valid
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		// Extract userId from the token claims
+		userId, ok := claims["userId"].(string)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid userId in token"})
+			c.Abort()
+			return
+		}
+
+		// Add userId to the Gin context for further use
+		c.Set("userId", userId)
+
+		// Continue with the next middleware or handler
+		c.Next()
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.Abort()
 	}
 }
