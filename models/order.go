@@ -26,8 +26,8 @@ type Order struct {
 	UserId            uint           `json:"-"`
 	Product           Product        `json:"product"`
 	ProductId         uint           `json:"-"`
-	Amount            uint           `json:"amount"`
-	AmountDue         uint           `json:"amountDue"`
+	Amount            int            `json:"amount"`
+	AmountDue         int            `json:"amountDue"`
 	User              User           `json:"user"`
 	CreatedAt         time.Time      `json:"createdAt"`
 	UpdatedAt         time.Time      `json:"updatedAt"`
