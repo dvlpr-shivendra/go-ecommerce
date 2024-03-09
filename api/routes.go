@@ -12,6 +12,8 @@ import (
 func SetupRoutes() {
 	r := gin.Default()
 
+	r.MaxMultipartMemory = 8 << 20  // 8 MiB
+
 	r.Use(func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 		c.Next()
@@ -27,8 +29,10 @@ func SetupRoutes() {
 
 	r.POST("/auth/signup", handlers.HandleSignup)
 	r.POST("/auth/login", handlers.HandleLogin)
+
 	guardedRoutes.POST("/order/init", handlers.HandleOrderInit)
 	guardedRoutes.POST("/order/success", handlers.HandleOrderSuccess)
+	guardedRoutes.POST("/files/upload", handlers.HandleFilesUpload)
 
 	r.Run()
 }
