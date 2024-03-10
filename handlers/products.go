@@ -38,7 +38,7 @@ func HandleGetProducts(c *gin.Context) {
 
 	var products []models.Product
 
-	app.Db.Offset(offset).Limit(limit).Find(&products)
+	app.Db.Offset(offset).Limit(limit).Preload("Images").Find(&products)
 
 	c.JSON(http.StatusOK, gin.H{
 		"page":     page,

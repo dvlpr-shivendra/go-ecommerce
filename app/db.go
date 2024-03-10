@@ -33,6 +33,7 @@ func InitDB() {
 	db.AutoMigrate(&models.Address{})
 	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.Product{})
+	db.AutoMigrate(&models.ProductImage{})
 	db.AutoMigrate(&models.Order{})
 
 	if err != nil {
