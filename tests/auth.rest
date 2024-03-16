@@ -1,5 +1,5 @@
 ###
-POST http://localhost:8080/auth/signup
+POST http://localhost:9090/auth/signup
 content-type: application/json
 
 {
@@ -10,7 +10,7 @@ content-type: application/json
 }
 
 ###
-POST http://localhost:8080/auth/login
+POST http://localhost:9090/auth/login
 content-type: application/json
 
 {

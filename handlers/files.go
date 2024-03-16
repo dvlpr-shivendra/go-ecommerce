@@ -2,20 +2,40 @@ package handlers
 
 import (
 	"fmt"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"mime/multipart"
+	"net/http"
 )
 
+type FileUpload struct {
+	Files []*multipart.FileHeader `form:"files[]" binding:"required"`
+}
+
 func HandleFilesUpload(c *gin.Context) {
-	form, _ := c.MultipartForm()
-		files := form.File["files[]"]
+	var form FileUpload
 
-		for _, file := range files {
-			fmt.Println(file.Filename)
+	// Parse the form data including the files
+	if err := c.ShouldBind(&form); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-			// Upload the file to specific dst.
-			c.SaveUploadedFile(file, "storage/" + file.Filename)
+	// Iterate through each file
+	for _, fileHeader := range form.Files {
+		// Access the original file name
+		originalFileName := fileHeader.Filename
+
+		// Save the file
+		err := c.SaveUploadedFile(fileHeader, "uploads/"+originalFileName)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
+			return
 		}
-		c.String(http.StatusOK, fmt.Sprintf("%d files uploaded!", len(files)))
+
+		// Process the uploaded file as needed
+		fmt.Printf("Original File Name: %s, File saved: %s\n", originalFileName, originalFileName)
+	}
+
+	// Send a response
+	c.JSON(http.StatusOK, gin.H{"message": "Files uploaded successfully"})
 }

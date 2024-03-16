@@ -2,17 +2,17 @@ package api
 
 import (
 	"ecommerce/handlers"
-	"net/http"
-	"os"
-
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"net/http"
+	"os"
 )
 
 func SetupRoutes() {
 	r := gin.Default()
 
-	r.MaxMultipartMemory = 8 << 20  // 8 MiB
+	r.MaxMultipartMemory = 8 << 20 // 8 MiB
 
 	r.Use(func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
@@ -59,7 +59,7 @@ func authMiddleware(c *gin.Context) {
 
 	// Check if the token is missing
 	if tokenString == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized1"})
 		c.Abort()
 		return
 	}
@@ -73,15 +73,16 @@ func authMiddleware(c *gin.Context) {
 
 	// Check for parsing errors
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized2"})
 		c.Abort()
 		return
 	}
 
 	// Check if the token is valid
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		fmt.Println(claims["userId"])
 		// Extract userId from the token claims
-		userId, ok := claims["userId"].(string)
+		userId, ok := claims["userId"]
 		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid userId in token"})
 			c.Abort()
