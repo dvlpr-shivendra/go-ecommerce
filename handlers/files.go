@@ -2,9 +2,12 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"mime/multipart"
 	"net/http"
+	"strings"
+	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type FileUpload struct {
@@ -20,13 +23,16 @@ func HandleFilesUpload(c *gin.Context) {
 		return
 	}
 
+	var fileNames []string // Array to store filenames to be returned in response
+
 	// Iterate through each file
 	for _, fileHeader := range form.Files {
 		// Access the original file name
 		originalFileName := fileHeader.Filename
-
-		// Save the file
-		err := c.SaveUploadedFile(fileHeader, "uploads/"+originalFileName)
+		prefix := strings.ReplaceAll(time.Now().UTC().Format(time.RFC3339), ":", "") // Create time string and remove :
+		fileName := prefix + strings.ReplaceAll(originalFileName, " ", "") // Remove spaces from the filename
+		fileNames = append(fileNames, fileName)
+		err := c.SaveUploadedFile(fileHeader, "uploads/"+fileName) // Save the file
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
 			return
@@ -37,5 +43,5 @@ func HandleFilesUpload(c *gin.Context) {
 	}
 
 	// Send a response
-	c.JSON(http.StatusOK, gin.H{"message": "Files uploaded successfully"})
+	c.JSON(http.StatusCreated, gin.H{"files": fileNames})
 }
