@@ -101,7 +101,7 @@ func HandleLogin(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusContinue, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"token": tokenStr,
 		"user": user,
 	})
