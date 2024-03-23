@@ -89,11 +89,6 @@ func HandleLogin(c *gin.Context) {
 		return
 	}
 
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
-		return
-	}
-
 	tokenStr, err := generateJWT(user.ID)
 
 	if err != nil {

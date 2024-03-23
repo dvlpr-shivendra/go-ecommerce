@@ -30,6 +30,8 @@ func SetupRoutes() {
 	r.POST("/auth/signup", handlers.HandleSignup)
 	r.POST("/auth/login", handlers.HandleLogin)
 
+	r.GET("/files/:fileName", handlers.HandleFetchFile)
+
 	guardedRoutes.POST("/order/init", handlers.HandleOrderInit)
 	guardedRoutes.POST("/order/success", handlers.HandleOrderSuccess)
 	guardedRoutes.POST("/files/upload", handlers.HandleFilesUpload)

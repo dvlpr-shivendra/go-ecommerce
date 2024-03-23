@@ -45,3 +45,8 @@ func HandleFilesUpload(c *gin.Context) {
 	// Send a response
 	c.JSON(http.StatusCreated, gin.H{"files": fileNames})
 }
+
+func HandleFetchFile(c *gin.Context) {
+	fileName := c.Param("fileName")
+	c.File("uploads/" + fileName)
+}
