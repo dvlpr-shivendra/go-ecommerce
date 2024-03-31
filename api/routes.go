@@ -2,7 +2,6 @@ package api
 
 import (
 	"ecommerce/handlers"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
@@ -82,7 +81,6 @@ func authMiddleware(c *gin.Context) {
 
 	// Check if the token is valid
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Println(claims["userId"])
 		// Extract userId from the token claims
 		userId, ok := claims["userId"]
 		if !ok {
