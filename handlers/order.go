@@ -48,7 +48,7 @@ func HandleOrderInit(c *gin.Context) {
 	}
 
 	order.ProductId = product.ID
-	order.UserId = 1
+	order.UserId = uint(c.GetFloat64("userId"))
 	order.Status = "pending"
 	order.ShippingAddressID = 1
 	order.BillingAddressID = 1
