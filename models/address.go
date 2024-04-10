@@ -1,8 +1,8 @@
 package models
 
 import (
-	"time"
 	"gorm.io/gorm"
+	"time"
 )
 
 type Address struct {
@@ -11,6 +11,7 @@ type Address struct {
 	Line2      string         `json:"line2"`
 	PostalCode string         `json:"postalCode"`
 	Landmark   string         `json:"landmark"`
+	UserId     uint           `json:"-"`
 	CreatedAt  time.Time      `json:"createdAt"`
 	UpdatedAt  time.Time      `json:"updatedAt"`
 	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
