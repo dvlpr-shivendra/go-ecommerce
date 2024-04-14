@@ -49,20 +49,20 @@ func HandleSignup(c *gin.Context) {
 	result := app.Db.Create(&user)
 
 	if result.Error != nil {
-		c.JSON(http.StatusOK, gin.H{"error": result.Error})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Something went wrong"})
 		return
 	}
 
 	tokenStr, err := generateJWT(user.ID)
 
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Something went wrong"})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
 		"token": tokenStr,
-		"user": user,
+		"user":  user,
 	})
 }
 
@@ -98,7 +98,7 @@ func HandleLogin(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"token": tokenStr,
-		"user": user,
+		"user":  user,
 	})
 }
 
