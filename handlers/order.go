@@ -110,7 +110,7 @@ func HandleOrderSuccess(c *gin.Context) {
 
 	receivedAmount := int(payment["amount"].(float64))
 
-	if payment["status"].(string) != "authorized" || receivedAmount != order.Amount * 100 {
+	if payment["status"].(string) != "authorized" || receivedAmount != order.Amount*100 {
 
 		// TODO: can we return the user's money here??
 
@@ -135,4 +135,22 @@ func HandleOrderSuccess(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{"order": order})
+}
+
+func HandleGetOrders(c *gin.Context) {
+	userId := uint(c.GetFloat64("userId"))
+
+	var orders []models.Order
+
+	if err := app.Db.Model(&models.Order{}).
+		Where("user_id = ?", userId).
+		Preload("Product").
+		Preload("ShippingAddress").
+		Order("created_at DESC").
+		Find(&orders).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Something went wrong"})
+		return
+	}
+
+	c.JSON(200, orders)
 }

@@ -31,8 +31,9 @@ func SetupRoutes() {
 
 	r.GET("/files/:fileName", handlers.HandleFetchFile)
 
-	guardedRoutes.POST("/order/init", handlers.HandleOrderInit)
-	guardedRoutes.POST("/order/success", handlers.HandleOrderSuccess)
+	guardedRoutes.GET("/orders", handlers.HandleGetOrders)
+	guardedRoutes.POST("/orders/init", handlers.HandleOrderInit)
+	guardedRoutes.POST("/orders/success", handlers.HandleOrderSuccess)
 	guardedRoutes.POST("/files/upload", handlers.HandleFilesUpload)
 
 	guardedRoutes.POST("/address", handlers.HandleSaveAddress)
