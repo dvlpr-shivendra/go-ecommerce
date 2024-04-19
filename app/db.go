@@ -39,11 +39,6 @@ func InitDB() {
 		time.Sleep(5 * time.Second)
 	}
 
-	if err != nil {
-		fmt.Printf("Could not connect to postgres database: %v\n", err)
-		os.Exit(1)
-	}
-
 	Db = db
 
 	if err := db.Exec("CREATE TYPE order_status AS ENUM ('pending', 'processing', 'shipped', 'delivered', 'canceled')").Error; err != nil {
