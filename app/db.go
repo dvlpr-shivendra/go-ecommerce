@@ -2,6 +2,8 @@ package app
 
 import (
 	"fmt"
+	"log"
+	"time"
 
 	"os"
 
@@ -26,9 +28,27 @@ func InitDB() {
 		dbHost, dbUser, dbPassword, dbName, dbPort,
 	)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	var db *gorm.DB
+	var err error
+
+	for i := 0; i < 3; i++ {
+		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		if err == nil {
+			break
+		}
+		time.Sleep(5 * time.Second)
+	}
+
+	if err != nil {
+		fmt.Printf("Could not connect to postgres database: %v\n", err)
+		os.Exit(1)
+	}
 
 	Db = db
+
+	if err := db.Exec("CREATE TYPE order_status AS ENUM ('pending', 'processing', 'shipped', 'delivered', 'canceled')").Error; err != nil {
+		log.Printf("Error creating order_status enum: %v\n", err)
+	}
 
 	db.AutoMigrate(&models.Address{})
 	db.AutoMigrate(&models.User{})
