@@ -41,8 +41,15 @@ func InitDB() {
 
 	Db = db
 
-	if err := db.Exec("CREATE TYPE order_status AS ENUM ('pending', 'processing', 'shipped', 'delivered', 'canceled')").Error; err != nil {
-		log.Printf("Error creating order_status enum: %v\n", err)
+	var orderStatusExists bool
+
+	db.Raw("SELECT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status')").Scan(&orderStatusExists)
+	
+	if !orderStatusExists {
+		query := "CREATE TYPE order_status AS ENUM ('pending', 'processing', 'shipped', 'delivered', 'canceled')"
+		if err := db.Exec(query).Error; err != nil {
+			log.Printf("Error creating order_status enum: %v\n", err)
+		}
 	}
 
 	db.AutoMigrate(&models.Address{})
