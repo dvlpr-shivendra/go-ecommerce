@@ -22,7 +22,6 @@ func SetupRoutes() {
 
 	guardedRoutes := r.Group("/", authMiddleware)
 
-	r.POST("/products", handlers.HandleSaveProduct)
 	r.GET("/products", handlers.HandleGetProducts)
 	r.GET("/products/:id", handlers.HandleGetProductById)
 
@@ -30,6 +29,8 @@ func SetupRoutes() {
 	r.POST("/auth/login", handlers.HandleLogin)
 
 	r.GET("/files/:fileName", handlers.HandleFetchFile)
+
+	guardedRoutes.POST("/products", handlers.HandleSaveProduct)
 
 	guardedRoutes.GET("/orders", handlers.HandleGetOrders)
 	guardedRoutes.POST("/orders/init", handlers.HandleOrderInit)
